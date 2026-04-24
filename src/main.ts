@@ -55,7 +55,7 @@ app.disableHardwareAcceleration();
 if (process.platform === 'linux') {
   app.commandLine.appendSwitch('disable-gpu');
   app.commandLine.appendSwitch('disable-gpu-compositing');
-  logger.info('Applied Linux GPU-safe Chromium switches for Antigravity Manager startup');
+  logger.info('Applied Linux GPU-safe Chromium switches for Muskz Command startup');
 }
 
 if (squirrelStartup) {
@@ -167,7 +167,7 @@ function showWindowsInstallNoticeIfNeeded() {
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 if (isDev) {
-  app.setName('Antigravity Manager Dev');
+  app.setName('Muskz Command Dev');
 }
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
@@ -234,8 +234,8 @@ function createWindow({ startHidden }: { startHidden: boolean }) {
     },
     // Use process.cwd() in dev to find the icon reliably
     icon: inDevelopment
-      ? path.join(process.cwd(), 'src/assets/icon.png')
-      : path.join(__dirname, '../assets/icon.png'),
+      ? path.join(process.cwd(), 'src/assets/pixel_profile.png')
+      : path.join(__dirname, '../assets/pixel_profile.png'),
   });
   globalMainWindow = mainWindow;
   logger.info('createWindow: BrowserWindow instance created');

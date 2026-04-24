@@ -124,7 +124,8 @@ export async function isProcessRunning(): Promise<boolean> {
       if (
         name.includes('manager') ||
         cmd.includes('manager') ||
-        cmd.includes('antigravity-manager')
+        cmd.includes('antigravity-manager') ||
+        cmd.includes('muskz-manager')
       ) {
         continue;
       }
@@ -321,8 +322,13 @@ export async function closeAntigravity(): Promise<void> {
       if (p.pid === currentPid) {
         return false;
       }
-      // Exclude this electron app (if named Antigravity Manager or antigravity-manager)
-      if (p.cmd.includes('Antigravity Manager') || p.cmd.includes('antigravity-manager')) {
+      // Exclude this electron app for both legacy and current visible names.
+      if (
+        p.cmd.includes('Antigravity Manager') ||
+        p.cmd.includes('antigravity-manager') ||
+        p.cmd.includes('Muskz Manager') ||
+        p.cmd.includes('muskz-manager')
+      ) {
         return false;
       }
       // Match Antigravity (but not manager)

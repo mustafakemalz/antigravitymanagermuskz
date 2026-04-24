@@ -6,7 +6,7 @@ import { logger } from './logger';
 import { AppConfig } from '../types/config';
 
 export const AUTO_START_ARG = '--autostart';
-const LINUX_AUTOSTART_FILENAME = 'antigravity-manager.desktop';
+const LINUX_AUTOSTART_FILENAME = 'muskz-manager.desktop';
 
 function getLinuxAutoStartPath() {
   const dir = path.join(os.homedir(), '.config', 'autostart');
@@ -61,6 +61,8 @@ function cleanupLinuxAutoStartEntries(currentPath: string) {
     `${app.getName().replace(/\s+/g, '')}.desktop`,
     'Antigravity Manager.desktop',
     'AntigravityManager.desktop',
+    'Muskz Manager.desktop',
+    'MuskzManager.desktop',
   ];
 
   for (const name of legacyNames) {

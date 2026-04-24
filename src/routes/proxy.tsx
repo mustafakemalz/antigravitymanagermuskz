@@ -1,7 +1,3 @@
-/**
- * API Proxy Service Page
- * Provides service control, model mapping, and usage examples
- */
 import { createFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -9,11 +5,15 @@ import { ipc } from '@/ipc/manager';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import { ProxyConfig } from '@/types/config';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { ControlToggle } from '@/components/ui/ControlToggle';
+import { LedProgress } from '@/components/ui/LedProgress';
+import { PanelButton } from '@/components/ui/PanelButton';
+import { PanelCard, PanelCardContent, PanelCardHeader } from '@/components/ui/PanelCard';
+import { PanelSectionHeader } from '@/components/ui/PanelSectionHeader';
+import { TerminalStat } from '@/components/ui/TerminalStat';
 import {
   Select,
   SelectContent,
@@ -33,6 +33,9 @@ import {
   Terminal,
   Eye,
   EyeOff,
+  Shield,
+  KeyRound,
+  Router,
 } from 'lucide-react';
 import {
   Dialog,
@@ -42,6 +45,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 type ProxyProtocol = 'openai' | 'anthropic';
 
@@ -96,11 +100,14 @@ function resolveAnthropicMappingValue(
   return fallback;
 }
 
+function getProxyTone(enabled: boolean): 'cyan' | 'warning' {
+  return enabled ? 'cyan' : 'warning';
+}
+
 function ProxyPage() {
   const { t } = useTranslation();
   const { config, isLoading, saveConfig } = useAppConfig();
 
-  // Query all available local IPs
   const { data: localIps } = useQuery({
     queryKey: ['system', 'localIps'],
     queryFn: async () => {
@@ -116,10 +123,14 @@ function ProxyPage() {
     retry: 3,
   });
 
-  // Selected IP for display (defaults to first recommended or first available)
   const [selectedIp, setSelectedIp] = useState<string>('');
+  const [proxyConfig, setProxyConfig] = useState<ProxyConfig | undefined>(undefined);
+  const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+  const [selectedProtocol, setSelectedProtocol] = useState<ProxyProtocol>('openai');
+  const [activeModelTab, setActiveModelTab] = useState('gemini-3.1-pro-high');
+  const [copied, setCopied] = useState<string | null>(null);
 
-  // Set default selected IP when IPs are loaded
   useEffect(() => {
     if (localIps && localIps.length > 0 && !selectedIp) {
       const recommended = localIps.find((ip) => ip.isRecommended);
@@ -127,31 +138,21 @@ function ProxyPage() {
     }
   }, [localIps, selectedIp]);
 
-  // Local state for proxyConfig editing
-  const [proxyConfig, setProxyConfig] = useState<ProxyConfig | undefined>(undefined);
-  const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false);
-  const [showKey, setShowKey] = useState(false);
-
-  // Sync config.proxy to local state when loaded, and check actual server status
   useEffect(() => {
     if (config) {
-      // Check actual server status and sync with config
       const syncServerStatus = async () => {
         try {
           const status = await ipc.client.gateway.status();
           const actualEnabled = status.running;
 
-          // If config says enabled but server not running, or vice versa, sync
           if (config.proxy.enabled !== actualEnabled) {
             const syncedConfig = { ...config.proxy, enabled: actualEnabled };
             setProxyConfig(syncedConfig);
-            // Also save the corrected state
             await saveConfig({ ...config, proxy: syncedConfig });
           } else {
             setProxyConfig(config.proxy);
           }
         } catch {
-          // If status check fails, just use config value
           setProxyConfig(config.proxy);
         }
       };
@@ -159,7 +160,6 @@ function ProxyPage() {
     }
   }, [config, saveConfig]);
 
-  // Helper to update proxyConfig and auto-save
   const updateProxyConfig = async (newProxyConfig: ProxyConfig) => {
     setProxyConfig(newProxyConfig);
     if (config) {
@@ -167,12 +167,6 @@ function ProxyPage() {
     }
   };
 
-  // ===== Usage Examples State =====
-  const [selectedProtocol, setSelectedProtocol] = useState<ProxyProtocol>('openai');
-  const [activeModelTab, setActiveModelTab] = useState('gemini-3.1-pro-high');
-  const [copied, setCopied] = useState<string | null>(null);
-
-  // Computed values for examples
   const apiKey = proxyConfig?.api_key || 'YOUR_API_KEY';
   const baseUrl = `http://localhost:${proxyConfig?.port || 8045}`;
 
@@ -255,210 +249,239 @@ print(response.choices[0].message.content)`;
   }
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-5 p-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">{t('proxy.title')}</h2>
-        <p className="text-muted-foreground mt-1">{t('proxy.description')}</p>
+    <div className="space-y-5">
+      <PanelCard active={proxyConfig.enabled}>
+        <PanelCardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="terminal-meta">Network Ops Console</div>
+              <h2 className="mt-2 text-3xl font-semibold uppercase tracking-[0.18em]">
+                {t('proxy.title')}
+              </h2>
+              <p className="text-muted-foreground mt-3 max-w-3xl text-sm">
+                {t('proxy.description')}
+              </p>
+            </div>
 
-        {/* Local Access Info Banner */}
-        {proxyConfig?.enabled && (
-          <div className="mt-4 flex flex-col gap-2 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200">
-            <div className="flex items-center gap-2">
-              <div className="font-semibold">{t('proxy.config.local_access')}</div>
-              <code className="rounded bg-blue-100 px-1.5 py-0.5 font-mono select-all dark:bg-blue-900/50">
-                http://{selectedIp || 'localhost'}:{proxyConfig.port}/v1
-              </code>
-              {/* IP Selector Dropdown */}
-              {localIps && localIps.length > 1 && (
-                <Select value={selectedIp} onValueChange={setSelectedIp}>
-                  <SelectTrigger className="ml-2 h-7 w-auto min-w-[180px] text-xs">
-                    <SelectValue placeholder={t('proxy.config.select_ip')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {localIps.map((ip) => (
-                      <SelectItem key={ip.address} value={ip.address} className="text-xs">
-                        {ip.address} ({ip.name}){ip.isRecommended && ' ★'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <TerminalStat
+                label="Gateway"
+                value={proxyConfig.enabled ? t('proxy.service.running') : t('proxy.service.stopped')}
+                tone={proxyConfig.enabled ? 'cyan' : 'warning'}
+              />
+              <TerminalStat label="Port" value={proxyConfig.port} />
+              <TerminalStat label="Timeout" value={`${proxyConfig.request_timeout}s`} />
+            </div>
+          </div>
+        </PanelCardHeader>
+
+        <PanelCardContent className="space-y-4">
+          {proxyConfig.enabled && (
+            <div className="panel-card px-4 py-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <TerminalStat
+                  className="min-w-[220px] flex-1"
+                  label={t('proxy.config.local_access')}
+                  value={`http://${selectedIp || 'localhost'}:${proxyConfig.port}/v1`}
+                  tone="cyan"
+                />
+                {localIps && localIps.length > 1 && (
+                  <div className="min-w-[220px]">
+                    <Label className="terminal-meta">{t('proxy.config.select_ip')}</Label>
+                    <Select value={selectedIp} onValueChange={setSelectedIp}>
+                      <SelectTrigger className="panel-input mt-2">
+                        <SelectValue placeholder={t('proxy.config.select_ip')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {localIps.map((ip) => (
+                          <SelectItem key={ip.address} value={ip.address}>
+                            {ip.address} ({ip.name}){ip.isRecommended ? ' *' : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+              {!proxyConfig.api_key && (
+                <div className="text-secondary mt-3 text-xs uppercase tracking-[0.14em]">
+                  {t('proxy.config.no_token_warning')}
+                </div>
               )}
             </div>
-            {!proxyConfig.api_key && (
-              <div className="flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400">
-                {t('proxy.config.no_token_warning')}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+          )}
 
-      {/* Service Control Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>{t('proxy.service.title')}</CardTitle>
-              <CardDescription>{t('proxy.service.description')}</CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <div
-                className={`h-3 w-3 rounded-full ${proxyConfig.enabled ? 'animate-pulse bg-green-500' : 'bg-gray-400'}`}
-              ></div>
-              <span className="text-sm font-medium">
-                {proxyConfig.enabled ? t('proxy.service.running') : t('proxy.service.stopped')}
-              </span>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Start/Stop Button */}
-          <div className="flex items-center gap-4">
-            <Button
-              variant={proxyConfig.enabled ? 'destructive' : 'default'}
-              onClick={async () => {
-                const { ipc } = await import('@/ipc/manager');
-                if (proxyConfig.enabled) {
-                  await ipc.client.gateway.stop();
-                  updateProxyConfig({ ...proxyConfig, enabled: false });
-                } else {
-                  await ipc.client.gateway.start({ port: proxyConfig.port });
-                  updateProxyConfig({ ...proxyConfig, enabled: true });
-                }
-              }}
-            >
-              {proxyConfig.enabled ? t('proxy.service.stop') : t('proxy.service.start')}
-            </Button>
-          </div>
-
-          {/* Port & Timeout Configuration */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="gateway-port">{t('proxy.config.port')}</Label>
-              <Input
-                id="gateway-port"
-                type="number"
-                value={proxyConfig.port}
-                onChange={(e) =>
-                  updateProxyConfig({ ...proxyConfig, port: parseInt(e.target.value) || 8045 })
-                }
-                disabled={proxyConfig.enabled}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="gateway-timeout">{t('proxy.config.timeout')}</Label>
-              <Input
-                id="gateway-timeout"
-                type="number"
-                value={proxyConfig.request_timeout}
-                onChange={(e) =>
-                  updateProxyConfig({
-                    ...proxyConfig,
-                    request_timeout: parseInt(e.target.value) || 120,
-                  })
-                }
-              />
-            </div>
-          </div>
-
-          {/* API Key */}
-          <div className="space-y-2">
-            <Label>{t('proxy.config.api_key')}</Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Input
-                  value={proxyConfig.api_key || ''}
-                  readOnly
-                  type={showKey ? 'text' : 'password'}
-                  className="pr-10 font-mono text-sm"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowKey(!showKey)}
-                  title={showKey ? t('proxy.config.hide_key') : t('proxy.config.show_key')}
-                >
-                  {showKey ? (
-                    <EyeOff className="text-muted-foreground h-4 w-4" />
-                  ) : (
-                    <Eye className="text-muted-foreground h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigator.clipboard.writeText(proxyConfig.api_key || '')}
-              >
-                <Copy size={14} className="mr-1" />
-                {t('proxy.copy')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setIsRegenerateDialogOpen(true)}>
-                {t('proxy.regenerate')}
-              </Button>
-            </div>
-            <Dialog open={isRegenerateDialogOpen} onOpenChange={setIsRegenerateDialogOpen}>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{t('proxy.regenerateConfirm.title')}</DialogTitle>
-                  <DialogDescription>{t('proxy.regenerateConfirm.description')}</DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsRegenerateDialogOpen(false)}>
-                    {t('proxy.regenerateConfirm.cancel')}
-                  </Button>
-                  <Button
-                    variant="destructive"
+          <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+            <PanelCard active={proxyConfig.enabled}>
+              <PanelCardHeader>
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="terminal-meta">{t('proxy.service.title')}</div>
+                    <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                      {t('proxy.service.description')}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={cn(
+                        'h-3 w-3 rounded-full',
+                        proxyConfig.enabled
+                          ? 'bg-primary shadow-[0_0_12px_rgba(0,255,255,0.75)]'
+                          : 'bg-secondary shadow-[0_0_12px_rgba(255,136,0,0.4)]',
+                      )}
+                    />
+                    <span className="text-xs uppercase tracking-[0.14em]">
+                      {proxyConfig.enabled ? t('proxy.service.running') : t('proxy.service.stopped')}
+                    </span>
+                  </div>
+                </div>
+              </PanelCardHeader>
+              <PanelCardContent className="space-y-5">
+                <div className="flex flex-wrap items-center gap-3">
+                  <PanelButton
+                    warning={proxyConfig.enabled}
                     onClick={async () => {
-                      const { ipc } = await import('@/ipc/manager');
-                      const result = await ipc.client.gateway.generateKey();
-                      updateProxyConfig({ ...proxyConfig, api_key: result.api_key });
-                      setIsRegenerateDialogOpen(false);
+                      const { ipc: localIpc } = await import('@/ipc/manager');
+                      if (proxyConfig.enabled) {
+                        await localIpc.client.gateway.stop();
+                        updateProxyConfig({ ...proxyConfig, enabled: false });
+                      } else {
+                        await localIpc.client.gateway.start({ port: proxyConfig.port });
+                        updateProxyConfig({ ...proxyConfig, enabled: true });
+                      }
                     }}
                   >
-                    {t('proxy.regenerateConfirm.confirm')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+                    <Shield className="h-4 w-4" />
+                    {proxyConfig.enabled ? t('proxy.service.stop') : t('proxy.service.start')}
+                  </PanelButton>
 
-          {/* Auto Start Toggle */}
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-1">
-              <Label>{t('proxy.config.auto_start')}</Label>
-              <p className="text-xs text-gray-500">{t('proxy.config.auto_start_desc')}</p>
-            </div>
-            <Switch
-              checked={proxyConfig.auto_start}
-              onCheckedChange={(checked) =>
-                updateProxyConfig({ ...proxyConfig, auto_start: checked })
-              }
-            />
-          </div>
-        </CardContent>
-      </Card>
+                  <div className="min-w-[160px] flex-1">
+                    <Label htmlFor="gateway-port" className="terminal-meta">
+                      {t('proxy.config.port')}
+                    </Label>
+                    <Input
+                      id="gateway-port"
+                      className="panel-input mt-2"
+                      type="number"
+                      value={proxyConfig.port}
+                      onChange={(e) =>
+                        updateProxyConfig({
+                          ...proxyConfig,
+                          port: parseInt(e.target.value, 10) || 8045,
+                        })
+                      }
+                      disabled={proxyConfig.enabled}
+                    />
+                  </div>
 
-      {/* Model Mapping Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('proxy.mapping.title')}</CardTitle>
-          <CardDescription>{t('proxy.mapping.description')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Sonnet 4.6 Card */}
-            <div className="flex flex-col rounded-lg border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 dark:border-blue-800/50 dark:from-blue-950/30 dark:to-blue-900/20">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                  Claude Sonnet 4.6 (Thinking)
-                </h3>
+                  <div className="min-w-[160px] flex-1">
+                    <Label htmlFor="gateway-timeout" className="terminal-meta">
+                      {t('proxy.config.timeout')}
+                    </Label>
+                    <Input
+                      id="gateway-timeout"
+                      className="panel-input mt-2"
+                      type="number"
+                      value={proxyConfig.request_timeout}
+                      onChange={(e) =>
+                        updateProxyConfig({
+                          ...proxyConfig,
+                          request_timeout: parseInt(e.target.value, 10) || 120,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="panel-card px-4 py-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <KeyRound className="h-4 w-4 text-cyan-300" />
+                    <span className="terminal-meta">{t('proxy.config.api_key')}</span>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      value={proxyConfig.api_key || ''}
+                      readOnly
+                      type={showKey ? 'text' : 'password'}
+                      className="panel-input h-12 pr-12 font-mono text-sm tracking-[0.12em]"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-1/2 right-2 h-9 w-9 -translate-y-1/2 rounded-sm"
+                      onClick={() => setShowKey(!showKey)}
+                      title={showKey ? t('proxy.config.hide_key') : t('proxy.config.show_key')}
+                    >
+                      {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <PanelButton
+                      className="h-9 px-3"
+                      onClick={() => navigator.clipboard.writeText(proxyConfig.api_key || '')}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                      {t('proxy.copy')}
+                    </PanelButton>
+                    <PanelButton className="h-9 px-3" onClick={() => setIsRegenerateDialogOpen(true)}>
+                      <Router className="h-3.5 w-3.5" />
+                      {t('proxy.regenerate')}
+                    </PanelButton>
+                  </div>
+                </div>
+
+                <div className="panel-card flex items-center justify-between px-4 py-4">
+                  <div className="space-y-1">
+                    <Label className="terminal-meta">{t('proxy.config.auto_start')}</Label>
+                    <p className="text-muted-foreground text-xs">
+                      {t('proxy.config.auto_start_desc')}
+                    </p>
+                  </div>
+                  <ControlToggle
+                    checked={proxyConfig.auto_start}
+                    onCheckedChange={(checked) =>
+                      updateProxyConfig({ ...proxyConfig, auto_start: checked })
+                    }
+                  />
+                </div>
+              </PanelCardContent>
+            </PanelCard>
+
+            <PanelCard>
+              <PanelCardHeader>
+                <div className="terminal-meta">Gateway Telemetry</div>
+              </PanelCardHeader>
+              <PanelCardContent className="space-y-4">
+                <TerminalStat label="State" value={proxyConfig.enabled ? 'Online' : 'Offline'} tone={proxyConfig.enabled ? 'cyan' : 'warning'} />
+                <div className="panel-card px-3 py-3">
+                  <div className="terminal-meta">Availability</div>
+                  <LedProgress value={proxyConfig.enabled ? 100 : 18} tone={getProxyTone(proxyConfig.enabled)} className="mt-3" />
+                </div>
+                <TerminalStat label="Access" value={selectedIp || 'localhost'} />
+                <TerminalStat label="Protocol Mode" value={selectedProtocol.toUpperCase()} />
+              </PanelCardContent>
+            </PanelCard>
+          </div>
+        </PanelCardContent>
+      </PanelCard>
+
+      <PanelCard>
+        <PanelCardHeader>
+          <div className="terminal-meta">{t('proxy.mapping.title')}</div>
+          <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+            {t('proxy.mapping.description')}
+          </div>
+        </PanelCardHeader>
+        <PanelCardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="panel-card px-4 py-4">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_rgba(0,255,255,0.75)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.14em]">
+                  Claude Sonnet 4.6
+                </span>
               </div>
-              <p className="mb-3 text-xs text-gray-600 dark:text-gray-400">
-                {t('proxy.mapping.maps_to')}
-              </p>
+              <p className="text-muted-foreground text-xs">{t('proxy.mapping.maps_to')}</p>
               <Select
                 value={resolveAnthropicMappingValue(
                   proxyConfig.anthropic_mapping,
@@ -472,7 +495,7 @@ print(response.choices[0].message.content)`;
                   })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="panel-input mt-3">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -485,17 +508,14 @@ print(response.choices[0].message.content)`;
               </Select>
             </div>
 
-            {/* Opus 4.6 Card */}
-            <div className="flex flex-col rounded-lg border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/50 p-4 dark:border-purple-800/50 dark:from-purple-950/30 dark:to-purple-900/20">
-              <div className="mb-2 flex items-center gap-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-purple-500"></div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                  Claude Opus 4.6 (Thinking)
-                </h3>
+            <div className="panel-card px-4 py-4">
+              <div className="mb-3 flex items-center gap-2">
+                <div className="h-2.5 w-2.5 rounded-full bg-secondary shadow-[0_0_12px_rgba(255,136,0,0.5)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.14em]">
+                  Claude Opus 4.6
+                </span>
               </div>
-              <p className="mb-3 text-xs text-gray-600 dark:text-gray-400">
-                {t('proxy.mapping.maps_to')}
-              </p>
+              <p className="text-muted-foreground text-xs">{t('proxy.mapping.maps_to')}</p>
               <Select
                 value={resolveAnthropicMappingValue(
                   proxyConfig.anthropic_mapping,
@@ -509,7 +529,7 @@ print(response.choices[0].message.content)`;
                   })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="panel-input mt-3">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -524,9 +544,8 @@ print(response.choices[0].message.content)`;
           </div>
 
           <div className="flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
+            <PanelButton
+              className="h-9 px-3"
               onClick={() =>
                 updateProxyConfig({
                   ...proxyConfig,
@@ -535,77 +554,75 @@ print(response.choices[0].message.content)`;
               }
             >
               {t('proxy.mapping.restore')}
-            </Button>
+            </PanelButton>
           </div>
-        </CardContent>
-      </Card>
+        </PanelCardContent>
+      </PanelCard>
 
-      {/* Usage Examples Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Code size={20} />
-            {t('proxy.examples.title')}
-          </CardTitle>
-          <CardDescription>{t('proxy.examples.description')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Protocol Selector Cards */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* OpenAI Protocol Card */}
-            <div
-              className={`cursor-pointer rounded-lg border-2 bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 transition-all dark:from-blue-950/30 dark:to-blue-900/20 ${selectedProtocol === 'openai' ? 'border-blue-500 shadow-md dark:border-blue-600' : 'border-blue-200 hover:border-blue-300 dark:border-blue-800/50'}`}
+      <PanelCard>
+        <PanelCardHeader>
+          <div className="flex items-center gap-2">
+            <Code className="h-4 w-4 text-cyan-300" />
+            <span className="terminal-meta">{t('proxy.examples.title')}</span>
+          </div>
+          <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+            {t('proxy.examples.description')}
+          </div>
+        </PanelCardHeader>
+        <PanelCardContent className="space-y-5">
+          <div className="grid gap-4 md:grid-cols-2">
+            <button
+              type="button"
+              className={cn(
+                'panel-card cursor-pointer px-4 py-4 text-left transition-all',
+                selectedProtocol === 'openai' && 'panel-card-active',
+              )}
               onClick={() => setSelectedProtocol('openai')}
             >
               <div className="mb-3 flex items-center gap-2">
-                <div
-                  className={`h-2 w-2 rounded-full ${selectedProtocol === 'openai' ? 'animate-pulse bg-blue-500' : 'bg-blue-400'}`}
-                ></div>
-                <span className="text-sm font-bold text-blue-700 dark:text-blue-400">
+                <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_rgba(0,255,255,0.75)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.14em]">
                   {t('settings.examples.openai_protocol')}
                 </span>
               </div>
-              <div className="mb-2 rounded border border-blue-200/50 bg-white/60 px-3 py-2 dark:border-blue-700/30 dark:bg-gray-800/40">
-                <code className="font-mono text-xs break-all text-gray-800 dark:text-gray-200">
-                  POST /v1/chat/completions
-                </code>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+              <div className="panel-input px-3 py-2 text-xs font-mono">POST /v1/chat/completions</div>
+              <p className="text-muted-foreground mt-2 text-xs">
                 {t('settings.examples.openai_tools')}
               </p>
-            </div>
+            </button>
 
-            {/* Anthropic Protocol Card */}
-            <div
-              className={`cursor-pointer rounded-lg border-2 bg-gradient-to-br from-purple-50 to-purple-100/50 p-4 transition-all dark:from-purple-950/30 dark:to-purple-900/20 ${selectedProtocol === 'anthropic' ? 'border-purple-500 shadow-md dark:border-purple-600' : 'border-purple-200 hover:border-purple-300 dark:border-purple-800/50'}`}
+            <button
+              type="button"
+              className={cn(
+                'panel-card cursor-pointer px-4 py-4 text-left transition-all',
+                selectedProtocol === 'anthropic' && 'panel-card-active',
+              )}
               onClick={() => setSelectedProtocol('anthropic')}
             >
               <div className="mb-3 flex items-center gap-2">
-                <div
-                  className={`h-2 w-2 rounded-full ${selectedProtocol === 'anthropic' ? 'animate-pulse bg-purple-500' : 'bg-purple-400'}`}
-                ></div>
-                <span className="text-sm font-bold text-purple-700 dark:text-purple-400">
+                <div className="h-2.5 w-2.5 rounded-full bg-secondary shadow-[0_0_12px_rgba(255,136,0,0.5)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.14em]">
                   {t('settings.examples.anthropic_protocol')}
                 </span>
               </div>
-              <div className="mb-2 rounded border border-purple-200/50 bg-white/60 px-3 py-2 dark:border-purple-700/30 dark:bg-gray-800/40">
-                <code className="font-mono text-xs break-all text-gray-800 dark:text-gray-200">
-                  POST /v1/messages
-                </code>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+              <div className="panel-input px-3 py-2 text-xs font-mono">POST /v1/messages</div>
+              <p className="text-muted-foreground mt-2 text-xs">
                 {t('settings.examples.anthropic_tools')}
               </p>
-            </div>
+            </button>
           </div>
 
-          {/* Model Tabs */}
-          <div className="flex flex-wrap gap-1 border-b border-gray-200 dark:border-gray-700">
+          <div className="panel-section-header">Model Slots</div>
+          <div className="flex flex-wrap gap-2">
             {EXAMPLE_MODELS.map((model) => (
               <button
                 key={model.id}
+                type="button"
                 onClick={() => setActiveModelTab(model.id)}
-                className={`flex items-center gap-1 rounded-t-lg px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors ${activeModelTab === model.id ? 'border-b-2 border-blue-600 bg-blue-50/50 text-blue-600 dark:border-blue-400 dark:bg-blue-900/10 dark:text-blue-400' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'}`}
+                className={cn(
+                  'panel-button h-9 px-3 text-[11px]',
+                  activeModelTab === model.id && 'panel-card-active',
+                )}
               >
                 {model.icon}
                 <span>{model.name}</span>
@@ -613,47 +630,78 @@ print(response.choices[0].message.content)`;
             ))}
           </div>
 
-          {/* cURL Example */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-                <Terminal size={16} />
-                cURL
-              </span>
-              <button
-                onClick={() => copyToClipboard(getCurlExample(activeModelTab), 'curl')}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700"
-              >
-                {copied === 'curl' ? <CheckCircle size={14} /> : <Copy size={14} />}
-                {copied === 'curl' ? t('proxy.copied') : t('proxy.copy')}
-              </button>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="panel-card px-4 py-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em]">
+                  <Terminal className="h-4 w-4" />
+                  cURL
+                </span>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(getCurlExample(activeModelTab), 'curl')}
+                  className="text-primary flex items-center gap-1 text-xs"
+                >
+                  {copied === 'curl' ? <CheckCircle className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied === 'curl' ? t('proxy.copied') : t('proxy.copy')}
+                </button>
+              </div>
+              <pre className="panel-input overflow-x-auto px-3 py-3 font-mono text-xs whitespace-pre-wrap">
+                {getCurlExample(activeModelTab)}
+              </pre>
             </div>
-            <pre className="overflow-x-auto rounded-lg bg-gray-900 p-3 font-mono text-xs whitespace-pre-wrap text-gray-100">
-              {getCurlExample(activeModelTab)}
-            </pre>
-          </div>
 
-          {/* Python Example */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-                <Code size={16} />
-                Python
-              </span>
-              <button
-                onClick={() => copyToClipboard(getPythonExample(activeModelTab), 'python')}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700"
-              >
-                {copied === 'python' ? <CheckCircle size={14} /> : <Copy size={14} />}
-                {copied === 'python' ? t('proxy.copied') : t('proxy.copy')}
-              </button>
+            <div className="panel-card px-4 py-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em]">
+                  <Code className="h-4 w-4" />
+                  Python
+                </span>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(getPythonExample(activeModelTab), 'python')}
+                  className="text-primary flex items-center gap-1 text-xs"
+                >
+                  {copied === 'python' ? <CheckCircle className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied === 'python' ? t('proxy.copied') : t('proxy.copy')}
+                </button>
+              </div>
+              <pre className="panel-input overflow-x-auto px-3 py-3 font-mono text-xs whitespace-pre-wrap">
+                {getPythonExample(activeModelTab)}
+              </pre>
             </div>
-            <pre className="overflow-x-auto rounded-lg bg-gray-900 p-3 font-mono text-xs whitespace-pre-wrap text-gray-100">
-              {getPythonExample(activeModelTab)}
-            </pre>
           </div>
-        </CardContent>
-      </Card>
+        </PanelCardContent>
+      </PanelCard>
+
+      <Dialog open={isRegenerateDialogOpen} onOpenChange={setIsRegenerateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('proxy.regenerateConfirm.title')}</DialogTitle>
+            <DialogDescription>{t('proxy.regenerateConfirm.description')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <PanelButton
+              className="h-9 px-3"
+              onClick={() => setIsRegenerateDialogOpen(false)}
+            >
+              {t('proxy.regenerateConfirm.cancel')}
+            </PanelButton>
+            <PanelButton
+              warning
+              className="h-9 px-3"
+              onClick={async () => {
+                const { ipc: localIpc } = await import('@/ipc/manager');
+                const result = await localIpc.client.gateway.generateKey();
+                updateProxyConfig({ ...proxyConfig, api_key: result.api_key });
+                setIsRegenerateDialogOpen(false);
+              }}
+            >
+              {t('proxy.regenerateConfirm.confirm')}
+            </PanelButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

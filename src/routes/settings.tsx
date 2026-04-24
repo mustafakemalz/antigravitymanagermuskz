@@ -1,8 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useTheme } from '@/components/theme-provider';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -18,11 +16,16 @@ import { useTranslation } from 'react-i18next';
 import { setAppLanguage } from '@/actions/language';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, FolderOpen } from 'lucide-react';
+import { Loader2, FolderOpen, HardDrive, MonitorCog, BellRing, Shield, Activity } from 'lucide-react';
 import { ModelVisibilitySettings } from '@/components/ModelVisibilitySettings';
 import { useEffect, useState } from 'react';
 import { ProxyConfig } from '@/types/config';
 import { openLogDirectory } from '@/actions/system';
+import { ControlToggle } from '@/components/ui/ControlToggle';
+import { PanelButton } from '@/components/ui/PanelButton';
+import { PanelCard, PanelCardContent, PanelCardHeader } from '@/components/ui/PanelCard';
+import { TerminalStat } from '@/components/ui/TerminalStat';
+import { cn } from '@/lib/utils';
 
 function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -30,13 +33,10 @@ function SettingsPage() {
   const { config, isLoading, saveConfig } = useAppConfig();
   const { toast } = useToast();
 
-  // Local state for configuration editing
   const [proxyConfig, setProxyConfig] = useState<ProxyConfig | undefined>(undefined);
 
-  // Sync config to local state when loaded
   useEffect(() => {
     if (config) {
-      // eslint-disable-next-line
       setProxyConfig(config.proxy);
     }
   }, [config]);
@@ -59,7 +59,6 @@ function SettingsPage() {
     setAppLanguage(value, i18n);
   };
 
-  // Helper to update proxyConfig and auto-save
   const updateProxyConfig = async (newProxyConfig: ProxyConfig) => {
     setProxyConfig(newProxyConfig);
     if (config) {
@@ -67,7 +66,7 @@ function SettingsPage() {
     }
   };
 
-  if (isLoading || !proxyConfig) {
+  if (isLoading || !proxyConfig || !config) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loader2 className="animate-spin" />
@@ -76,54 +75,80 @@ function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-5 p-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">{t('settings.title')}</h2>
-        <p className="text-muted-foreground mt-1">{t('settings.description')}</p>
-      </div>
+    <div className="space-y-5">
+      <PanelCard>
+        <PanelCardHeader>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="terminal-meta">Hardware Config</div>
+              <h2 className="mt-2 text-3xl font-semibold uppercase tracking-[0.18em]">
+                {t('settings.title')}
+              </h2>
+              <p className="text-muted-foreground mt-3 max-w-3xl text-sm">
+                {t('settings.description')}
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <TerminalStat label="Version" value={appVersion || t('common.unknown')} />
+              <TerminalStat label="Platform" value={platform || t('common.unknown')} />
+              <TerminalStat label="Theme" value={theme.toUpperCase()} />
+            </div>
+          </div>
+        </PanelCardHeader>
+      </PanelCard>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="general">{t('settings.general')}</TabsTrigger>
-          <TabsTrigger value="models">{t('settings.models')}</TabsTrigger>
-          <TabsTrigger value="proxy">{t('settings.proxy_tab')}</TabsTrigger>
+        <TabsList className="panel-card grid h-auto w-full grid-cols-3 p-1">
+          <TabsTrigger value="general" className="rounded-sm text-xs uppercase tracking-[0.14em]">
+            {t('settings.general')}
+          </TabsTrigger>
+          <TabsTrigger value="models" className="rounded-sm text-xs uppercase tracking-[0.14em]">
+            {t('settings.models')}
+          </TabsTrigger>
+          <TabsTrigger value="proxy" className="rounded-sm text-xs uppercase tracking-[0.14em]">
+            {t('settings.proxy_tab')}
+          </TabsTrigger>
         </TabsList>
 
-        {/* --- GENERAL TAB --- */}
         <TabsContent value="general" className="space-y-5">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('settings.appearance.title')}</CardTitle>
-              <CardDescription>{t('settings.appearance.description')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between space-x-2">
+          <PanelCard>
+            <PanelCardHeader>
+              <div className="flex items-center gap-2">
+                <MonitorCog className="h-4 w-4 text-cyan-300" />
+                <span className="terminal-meta">{t('settings.appearance.title')}</span>
+              </div>
+              <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                {t('settings.appearance.description')}
+              </div>
+            </PanelCardHeader>
+            <PanelCardContent className="space-y-4">
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label htmlFor="dark-mode">{t('settings.darkMode')}</Label>
-                  <p className="text-muted-foreground text-sm">
+                  <Label htmlFor="dark-mode" className="terminal-meta">
+                    {t('settings.darkMode')}
+                  </Label>
+                  <p className="text-muted-foreground text-xs">
                     {t('settings.darkModeDescription')}
                   </p>
                 </div>
-                <Switch
+                <ControlToggle
                   id="dark-mode"
                   checked={theme === 'dark'}
                   onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
                 />
               </div>
 
-              <div className="flex items-center justify-between space-x-2">
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label htmlFor="language">{t('settings.language.title')}</Label>
-                  <p className="text-muted-foreground text-sm">
+                  <Label htmlFor="language" className="terminal-meta">
+                    {t('settings.language.title')}
+                  </Label>
+                  <p className="text-muted-foreground text-xs">
                     {t('settings.language.description')}
                   </p>
                 </div>
-                <Select
-                  value={i18n.language}
-                  onValueChange={handleLanguageChange}
-                  key={i18n.language}
-                >
-                  <SelectTrigger className="w-[180px]">
+                <Select value={i18n.language} onValueChange={handleLanguageChange} key={i18n.language}>
+                  <SelectTrigger className="panel-input w-[200px]">
                     <SelectValue placeholder={t('settings.language.title')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -134,225 +159,233 @@ function SettingsPage() {
                   </SelectContent>
                 </Select>
               </div>
-            </CardContent>
-          </Card>
+            </PanelCardContent>
+          </PanelCard>
 
-          {/* Account Settings Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('settings.account.title')}</CardTitle>
-              <CardDescription>{t('settings.account.description')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Auto Refresh Quota */}
-              <div className="flex items-center justify-between rounded-lg border p-4">
+          <PanelCard>
+            <PanelCardHeader>
+              <div className="flex items-center gap-2">
+                <HardDrive className="h-4 w-4 text-cyan-300" />
+                <span className="terminal-meta">{t('settings.account.title')}</span>
+              </div>
+              <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                {t('settings.account.description')}
+              </div>
+            </PanelCardHeader>
+            <PanelCardContent className="space-y-4">
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label>{t('settings.account.auto_refresh')}</Label>
-                  <p className="text-xs text-gray-500">{t('settings.account.auto_refresh_desc')}</p>
+                  <Label className="terminal-meta">{t('settings.account.auto_refresh')}</Label>
+                  <p className="text-muted-foreground text-xs">
+                    {t('settings.account.auto_refresh_desc')}
+                  </p>
                 </div>
-                <Switch
-                  checked={config?.auto_refresh || false}
+                <ControlToggle
+                  checked={config.auto_refresh || false}
                   onCheckedChange={async (checked) => {
-                    if (config) {
-                      await saveConfig({ ...config, auto_refresh: checked });
-                    }
+                    await saveConfig({ ...config, auto_refresh: checked });
                   }}
                 />
               </div>
 
-              {/* Auto Sync Account */}
-              <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label>{t('settings.account.auto_sync')}</Label>
-                  <p className="text-xs text-gray-500">{t('settings.account.auto_sync_desc')}</p>
+                  <Label className="terminal-meta">{t('settings.account.auto_sync')}</Label>
+                  <p className="text-muted-foreground text-xs">
+                    {t('settings.account.auto_sync_desc')}
+                  </p>
                 </div>
-                <Switch
-                  checked={config?.auto_sync || false}
+                <ControlToggle
+                  checked={config.auto_sync || false}
                   onCheckedChange={async (checked) => {
-                    if (config) {
-                      await saveConfig({ ...config, auto_sync: checked });
-                    }
+                    await saveConfig({ ...config, auto_sync: checked });
                   }}
                 />
               </div>
-            </CardContent>
-          </Card>
+            </PanelCardContent>
+          </PanelCard>
 
           {isAutoStartSupported && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('settings.startup.title')}</CardTitle>
-                <CardDescription>{t('settings.startup.description')}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between rounded-lg border p-4">
+            <PanelCard>
+              <PanelCardHeader>
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-cyan-300" />
+                  <span className="terminal-meta">{t('settings.startup.title')}</span>
+                </div>
+                <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                  {t('settings.startup.description')}
+                </div>
+              </PanelCardHeader>
+              <PanelCardContent className="space-y-4">
+                <div className="panel-card flex items-center justify-between px-4 py-4">
                   <div className="space-y-1">
-                    <Label>{t('settings.startup.auto_startup')}</Label>
-                    <p className="text-xs text-gray-500">
+                    <Label className="terminal-meta">{t('settings.startup.auto_startup')}</Label>
+                    <p className="text-muted-foreground text-xs">
                       {t('settings.startup.auto_startup_desc')}
                     </p>
                   </div>
-                  <Switch
-                    checked={config?.auto_startup || false}
+                  <ControlToggle
+                    checked={config.auto_startup || false}
                     onCheckedChange={async (checked) => {
-                      if (config) {
-                        await saveConfig({ ...config, auto_startup: checked });
-                      }
+                      await saveConfig({ ...config, auto_startup: checked });
                     }}
                   />
                 </div>
                 {isMac && (
-                  <p className="text-muted-foreground text-xs">
-                    {t('settings.startup.macos_hint')}
-                  </p>
+                  <p className="text-muted-foreground text-xs">{t('settings.startup.macos_hint')}</p>
                 )}
-              </CardContent>
-            </Card>
+              </PanelCardContent>
+            </PanelCard>
           )}
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('settings.about.title')}</CardTitle>
-              <CardDescription>{t('settings.about.description')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="text-muted-foreground">{t('settings.version')}</div>
-                <div className="font-medium">{appVersion || t('common.unknown')}</div>
-
-                <div className="text-muted-foreground">{t('settings.platform')}</div>
-                <div className="font-medium capitalize">{platform || t('common.unknown')}</div>
-
-                <div className="text-muted-foreground">{t('settings.license')}</div>
-                <div className="font-medium">CC BY-NC-SA 4.0</div>
-
-                <div className="text-muted-foreground">{t('action.openLogs')}</div>
-                <button
-                  onClick={() => openLogDirectory()}
-                  className="flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  <FolderOpen className="h-4 w-4" />
-                  <span>{t('settings.openLogDir')}</span>
-                </button>
+          <PanelCard>
+            <PanelCardHeader>
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-cyan-300" />
+                <span className="terminal-meta">{t('settings.privacy.title')}</span>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Privacy & Error Reporting Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('settings.privacy.title')}</CardTitle>
-              <CardDescription>{t('settings.privacy.description')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                {t('settings.privacy.description')}
+              </div>
+            </PanelCardHeader>
+            <PanelCardContent className="space-y-4">
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label>{t('settings.privacy.error_reporting')}</Label>
-                  <p className="text-xs text-gray-500">
+                  <Label className="terminal-meta">{t('settings.privacy.error_reporting')}</Label>
+                  <p className="text-muted-foreground text-xs">
                     {t('settings.privacy.error_reporting_desc')}
                   </p>
                 </div>
-                <Switch
-                  checked={config?.error_reporting_enabled || false}
+                <ControlToggle
+                  checked={config.error_reporting_enabled || false}
                   onCheckedChange={async (checked) => {
-                    if (config) {
-                      await saveConfig({ ...config, error_reporting_enabled: checked });
-                    }
+                    await saveConfig({ ...config, error_reporting_enabled: checked });
                   }}
                 />
               </div>
               <p className="text-muted-foreground text-xs">{t('settings.privacy.restart_note')}</p>
-            </CardContent>
-          </Card>
+            </PanelCardContent>
+          </PanelCard>
 
-          {/* Notifications Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('settings.notifications.title')}</CardTitle>
-              <CardDescription>{t('settings.notifications.description')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border p-4">
+          <PanelCard>
+            <PanelCardHeader>
+              <div className="flex items-center gap-2">
+                <BellRing className="h-4 w-4 text-cyan-300" />
+                <span className="terminal-meta">{t('settings.notifications.title')}</span>
+              </div>
+              <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                {t('settings.notifications.description')}
+              </div>
+            </PanelCardHeader>
+            <PanelCardContent className="space-y-4">
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label>{t('settings.notifications.quotaAlert')}</Label>
-                  <p className="text-xs text-gray-500">
+                  <Label className="terminal-meta">{t('settings.notifications.quotaAlert')}</Label>
+                  <p className="text-muted-foreground text-xs">
                     {t('settings.notifications.quotaAlertDesc')}
                   </p>
                 </div>
-                <Switch
-                  checked={config?.quota_alert_enabled || false}
+                <ControlToggle
+                  checked={config.quota_alert_enabled || false}
                   onCheckedChange={async (checked) => {
-                    if (config) {
-                      try {
-                        await saveConfig({ ...config, quota_alert_enabled: checked });
-                      } catch {
-                        toast({
-                          title: t('common.error'),
-                          description: t('settings.notifications.saveFailed'),
-                          variant: 'destructive',
-                        });
-                      }
+                    try {
+                      await saveConfig({ ...config, quota_alert_enabled: checked });
+                    } catch {
+                      toast({
+                        title: t('common.error'),
+                        description: t('settings.notifications.saveFailed'),
+                        variant: 'destructive',
+                      });
                     }
                   }}
                 />
               </div>
-              <div className="flex items-center justify-between rounded-lg border p-4">
+
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label>{t('settings.notifications.quotaThreshold')}</Label>
-                  <p className="text-xs text-gray-500">
+                  <Label className="terminal-meta">{t('settings.notifications.quotaThreshold')}</Label>
+                  <p className="text-muted-foreground text-xs">
                     {t('settings.notifications.quotaThresholdDesc')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="number"
                     min={0}
                     max={100}
-                    value={config?.quota_alert_threshold ?? 20}
+                    value={config.quota_alert_threshold ?? 20}
                     onChange={async (e) => {
-                      const rawValue = e.target.value;
-                      const parsed = parseInt(rawValue, 10);
-                      if (isNaN(parsed) || parsed < 0 || parsed > 100) return;
+                      const parsed = parseInt(e.target.value, 10);
+                      if (isNaN(parsed) || parsed < 0 || parsed > 100) {
+                        return;
+                      }
 
-                      if (config) {
-                        try {
-                          await saveConfig({ ...config, quota_alert_threshold: parsed });
-                        } catch {
-                          toast({
-                            title: t('common.error'),
-                            description: t('settings.notifications.thresholdSaveFailed'),
-                            variant: 'destructive',
-                          });
-                        }
+                      try {
+                        await saveConfig({ ...config, quota_alert_threshold: parsed });
+                      } catch {
+                        toast({
+                          title: t('common.error'),
+                          description: t('settings.notifications.thresholdSaveFailed'),
+                          variant: 'destructive',
+                        });
                       }
                     }}
-                    className="w-16 rounded-md border bg-transparent px-2 py-1 text-center text-sm"
+                    className="panel-input h-10 w-20 text-center"
                   />
                   <span className="text-muted-foreground text-sm">%</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </PanelCardContent>
+          </PanelCard>
+
+          <PanelCard>
+            <PanelCardHeader>
+              <div className="terminal-meta">{t('settings.about.title')}</div>
+              <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                {t('settings.about.description')}
+              </div>
+            </PanelCardHeader>
+            <PanelCardContent className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-3">
+                <TerminalStat label={t('settings.version')} value={appVersion || t('common.unknown')} />
+                <TerminalStat label={t('settings.platform')} value={platform || t('common.unknown')} />
+                <TerminalStat label={t('settings.license')} value="CC BY-NC-SA 4.0" />
+              </div>
+
+              <div className="panel-card flex items-center justify-between px-4 py-4">
+                <div>
+                  <div className="terminal-meta">{t('action.openLogs')}</div>
+                  <div className="text-muted-foreground mt-1 text-xs">{t('settings.openLogDir')}</div>
+                </div>
+                <PanelButton className="h-9 px-3" onClick={() => openLogDirectory()}>
+                  <FolderOpen className="h-4 w-4" />
+                  {t('settings.openLogDir')}
+                </PanelButton>
+              </div>
+            </PanelCardContent>
+          </PanelCard>
         </TabsContent>
 
-        {/* --- MODELS TAB --- */}
         <TabsContent value="models" className="space-y-5">
           <ModelVisibilitySettings />
         </TabsContent>
 
-        {/* --- PROXY TAB (Upstream Proxy Config Only) --- */}
         <TabsContent value="proxy" className="space-y-5">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('settings.proxy.title')}</CardTitle>
-              <CardDescription>{t('settings.proxy.description')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between space-x-2">
+          <PanelCard>
+            <PanelCardHeader>
+              <div className="terminal-meta">{t('settings.proxy.title')}</div>
+              <div className="mt-2 text-sm uppercase tracking-[0.16em]">
+                {t('settings.proxy.description')}
+              </div>
+            </PanelCardHeader>
+            <PanelCardContent className="space-y-4">
+              <div className="panel-card flex items-center justify-between px-4 py-4">
                 <div className="space-y-1">
-                  <Label htmlFor="upstream-proxy-enabled">{t('settings.proxy.enable')}</Label>
+                  <Label htmlFor="upstream-proxy-enabled" className="terminal-meta">
+                    {t('settings.proxy.enable')}
+                  </Label>
                 </div>
-                <Switch
+                <ControlToggle
                   id="upstream-proxy-enabled"
                   checked={proxyConfig.upstream_proxy.enabled}
                   onCheckedChange={(checked) =>
@@ -363,10 +396,13 @@ function SettingsPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="upstream-proxy-url">{t('settings.proxy.url')}</Label>
+              <div className="panel-card px-4 py-4">
+                <Label htmlFor="upstream-proxy-url" className="terminal-meta">
+                  {t('settings.proxy.url')}
+                </Label>
                 <Input
                   id="upstream-proxy-url"
+                  className="panel-input mt-2"
                   placeholder="http://127.0.0.1:7890"
                   value={proxyConfig.upstream_proxy.url}
                   onChange={(e) =>
@@ -378,8 +414,8 @@ function SettingsPage() {
                   disabled={!proxyConfig.upstream_proxy.enabled}
                 />
               </div>
-            </CardContent>
-          </Card>
+            </PanelCardContent>
+          </PanelCard>
         </TabsContent>
       </Tabs>
     </div>

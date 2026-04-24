@@ -77,7 +77,7 @@ export class AuthServer {
             <html>
               <body style="font-family: sans-serif; text-align: center; padding-top: 50px;">
                 <h1>Login Successful</h1>
-                <p>You can close this window and return to Antigravity Manager.</p>
+                <p>You can close this window and return to Muskz Command.</p>
                 <script>
                   setTimeout(() => window.close(), 3000);
                 </script>

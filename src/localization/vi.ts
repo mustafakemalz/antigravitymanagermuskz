@@ -1,5 +1,5 @@
 const vi = {
-  appName: 'Antigravity Manager',
+  appName: 'Muskz Command',
   common: {
     loading: 'Đang tải...',
     error: 'Lỗi',
@@ -63,7 +63,7 @@ const vi = {
     models: 'Mô hình',
     appearance: {
       title: 'Giao diện',
-      description: 'Tùy chỉnh giao diện Antigravity Manager trên thiết bị của bạn.',
+      description: 'Tùy chỉnh giao diện Muskz Command trên thiết bị của bạn.',
     },
     darkMode: 'Chế độ tối',
     darkModeDescription: 'Bật chế độ tối để dễ nhìn hơn vào ban đêm.',

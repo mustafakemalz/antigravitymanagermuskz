@@ -204,7 +204,7 @@ const config: ForgeConfig = {
     asar: {
       unpack: '**/{better-sqlite3,keytar}/**/*',
     },
-    name: 'Antigravity Manager',
+    name: 'Muskz Command',
     executableName: windowsExecutableName,
     icon: 'images/icon', // Electron Forge automatically adds .icns/.ico
     extraResource: ['src/assets'], // Copy assets folder to resources/assets

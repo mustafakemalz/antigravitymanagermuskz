@@ -18,7 +18,7 @@ i18n
     resources: {
       en: {
         translation: {
-          appName: 'Antigravity Manager',
+          appName: 'Muskz Command',
           common: {
             loading: 'Loading...',
             error: 'Error',
@@ -82,7 +82,7 @@ i18n
             models: 'Models',
             appearance: {
               title: 'Appearance',
-              description: 'Customize how Antigravity Manager looks on your device.',
+              description: 'Customize how Muskz Command looks on your device.',
             },
             darkMode: 'Dark Mode',
             darkModeDescription: 'Enable dark mode for better viewing at night.',
@@ -495,7 +495,7 @@ i18n
       },
       'zh-CN': {
         translation: {
-          appName: 'Antigravity 管理器',
+          appName: 'Muskz Command',
           common: {
             loading: '加载中...',
             error: '错误',
@@ -963,7 +963,7 @@ i18n
       },
       ru: {
         translation: {
-          appName: 'Antigravity Manager',
+          appName: 'Muskz Command',
           common: {
             loading: 'Загрузка...',
             error: 'Ошибка',
@@ -1028,7 +1028,7 @@ i18n
             models: 'Модели',
             appearance: {
               title: 'Внешний вид',
-              description: 'Настройте внешний вид Antigravity Manager.',
+              description: 'Настройте внешний вид Muskz Command.',
             },
             darkMode: 'Темная тема',
             darkModeDescription: 'Включить темную тему для комфортной работы ночью.',

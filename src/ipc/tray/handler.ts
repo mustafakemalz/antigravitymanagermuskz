@@ -53,8 +53,8 @@ export function initTray(mainWindow: BrowserWindow) {
   const inDevelopment = process.env.NODE_ENV === 'development';
   // In production, extraResource copies 'src/assets' folder to 'resources/assets'
   const iconPath = inDevelopment
-    ? path.join(process.cwd(), 'src/assets/tray.png')
-    : path.join(process.resourcesPath, 'assets', 'tray.png');
+    ? path.join(process.cwd(), 'src/assets/pixel_profile.png')
+    : path.join(process.resourcesPath, 'assets', 'pixel_profile.png');
 
   logger.info(
     `Tray icon path: ${iconPath}, inDevelopment: ${inDevelopment}, resourcesPath: ${process.resourcesPath}`,
@@ -69,7 +69,7 @@ export function initTray(mainWindow: BrowserWindow) {
   }
 
   tray = new Tray(icon);
-  tray.setToolTip('Antigravity Manager');
+  tray.setToolTip('Muskz Command');
 
   tray.on('double-click', () => {
     if (globalMainWindow) {
