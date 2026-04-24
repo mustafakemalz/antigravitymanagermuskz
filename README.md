@@ -53,6 +53,8 @@ To initialize the command console on your local hardware:
 #### 1. INSTALL DEPENDENCIES
 Ensure you are running Node.js 20+.
 ```bash
+git clone https://github.com/mustafakemalz/antigravitymanagermuskz
+cd antigravitymanagermuskz
 npm install
 ```
 
