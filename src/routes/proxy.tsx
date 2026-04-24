@@ -324,10 +324,10 @@ print(response.choices[0].message.content)`;
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
-                        'h-3 w-3 rounded-full',
+                        'h-2 w-2 rounded-full',
                         proxyConfig.enabled
-                          ? 'bg-primary shadow-[0_0_12px_rgba(0,255,255,0.75)]'
-                          : 'bg-secondary shadow-[0_0_12px_rgba(255,136,0,0.4)]',
+                          ? 'bg-white'
+                          : 'bg-white/30',
                       )}
                     />
                     <span className="text-xs uppercase tracking-[0.14em]">
@@ -395,7 +395,7 @@ print(response.choices[0].message.content)`;
 
                 <div className="panel-card px-4 py-4">
                   <div className="mb-3 flex items-center gap-2">
-                    <KeyRound className="h-4 w-4 text-cyan-300" />
+                    <KeyRound className="h-4 w-4 text-white/70" />
                     <span className="terminal-meta">{t('proxy.config.api_key')}</span>
                   </div>
                   <div className="relative">
@@ -476,7 +476,7 @@ print(response.choices[0].message.content)`;
           <div className="grid gap-4 md:grid-cols-2">
             <div className="panel-card px-4 py-4">
               <div className="mb-3 flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_rgba(0,255,255,0.75)]" />
+                <div className="h-2 w-2 rounded-full bg-white" />
                 <span className="text-xs font-semibold uppercase tracking-[0.14em]">
                   Claude Sonnet 4.6
                 </span>
@@ -510,7 +510,7 @@ print(response.choices[0].message.content)`;
 
             <div className="panel-card px-4 py-4">
               <div className="mb-3 flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-secondary shadow-[0_0_12px_rgba(255,136,0,0.5)]" />
+                <div className="h-2 w-2 rounded-full bg-white/50" />
                 <span className="text-xs font-semibold uppercase tracking-[0.14em]">
                   Claude Opus 4.6
                 </span>
@@ -562,7 +562,7 @@ print(response.choices[0].message.content)`;
       <PanelCard>
         <PanelCardHeader>
           <div className="flex items-center gap-2">
-            <Code className="h-4 w-4 text-cyan-300" />
+            <Code className="h-4 w-4 text-white/70" />
             <span className="terminal-meta">{t('proxy.examples.title')}</span>
           </div>
           <div className="mt-2 text-sm uppercase tracking-[0.16em]">
@@ -580,7 +580,7 @@ print(response.choices[0].message.content)`;
               onClick={() => setSelectedProtocol('openai')}
             >
               <div className="mb-3 flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-[0_0_12px_rgba(0,255,255,0.75)]" />
+                <div className="h-2 w-2 rounded-full bg-white" />
                 <span className="text-xs font-semibold uppercase tracking-[0.14em]">
                   {t('settings.examples.openai_protocol')}
                 </span>
@@ -600,7 +600,7 @@ print(response.choices[0].message.content)`;
               onClick={() => setSelectedProtocol('anthropic')}
             >
               <div className="mb-3 flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-secondary shadow-[0_0_12px_rgba(255,136,0,0.5)]" />
+                <div className="h-2 w-2 rounded-full bg-white/50" />
                 <span className="text-xs font-semibold uppercase tracking-[0.14em]">
                   {t('settings.examples.anthropic_protocol')}
                 </span>

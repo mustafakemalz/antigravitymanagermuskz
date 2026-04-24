@@ -103,9 +103,9 @@ export const StatusBar: React.FC<StatusBarProps> = ({ isCollapsed = false }) => 
         {isLoading ? (
           <Loader2 className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin" />
         ) : isRunning ? (
-          <div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
+          <div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-green-500" />
         ) : (
-          <div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" />
+          <div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-red-500" />
         )}
         <div className="flex flex-col gap-1 leading-none">
           <span className="text-xs font-semibold tracking-wider uppercase opacity-80">Status</span>

@@ -324,6 +324,24 @@ function createWindow({ startHidden }: { startHidden: boolean }) {
     logger.info(`[Renderer Console][${level}] ${message} (${sourceId}:${lineNumber})`);
   });
 
+  // Handle Zoom manually to support all keyboard layouts (Ctrl+=, Ctrl++, Ctrl+-, Ctrl+0)
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.control || input.meta) {
+      if (input.key === '=' || input.key === '+') {
+        const currentZoom = mainWindow.webContents.getZoomLevel();
+        mainWindow.webContents.setZoomLevel(currentZoom + 0.5);
+        event.preventDefault();
+      } else if (input.key === '-') {
+        const currentZoom = mainWindow.webContents.getZoomLevel();
+        mainWindow.webContents.setZoomLevel(currentZoom - 0.5);
+        event.preventDefault();
+      } else if (input.key === '0') {
+        mainWindow.webContents.setZoomLevel(0);
+        event.preventDefault();
+      }
+    }
+  });
+
   mainWindow.on('focus', () => {
     CloudMonitorService.handleAppFocus();
   });

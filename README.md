@@ -1,412 +1,73 @@
-<p align="center">
-  <img src="docs/assets/logo.png" alt="Antigravity Manager" width="128" height="128" />
-</p>
+# [ ANTIGRAVITY MANAGER : MUSKZ COMMAND EDITION ]
 
-<h1 align="center">Antigravity Manager</h1>
-
-<p align="center">
-  <strong>🚀 Professional multi-account manager for Google Gemini & Claude AI</strong>
-</p>
-
-<p align="center">
-  English | <a href="README.zh-CN.md">简体中文</a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/Draculabo/AntigravityManager/actions/workflows/testing.yaml">
-    <img src="https://github.com/Draculabo/AntigravityManager/actions/workflows/testing.yaml/badge.svg" alt="Tests" />
-  </a>
-  <a href="https://github.com/Draculabo/AntigravityManager/actions/workflows/lint.yaml">
-    <img src="https://github.com/Draculabo/AntigravityManager/actions/workflows/lint.yaml/badge.svg" alt="Lint" />
-  </a>
-  <a href="https://github.com/Draculabo/AntigravityManager/releases">
-    <img src="https://img.shields.io/github/v/release/Draculabo/AntigravityManager?style=flat-square" alt="Release" />
-  </a>
-  <a href="https://github.com/Draculabo/AntigravityManager/releases">
-    <img src="https://img.shields.io/github/downloads/Draculabo/AntigravityManager/total?style=flat-square&color=blue" alt="Downloads" />
-  </a>
-  <a href="https://github.com/Draculabo/AntigravityManager/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Draculabo/AntigravityManager?style=flat-square" alt="License" />
-  </a>
-  <a href="https://github.com/Draculabo/AntigravityManager/stargazers">
-    <img src="https://img.shields.io/github/stars/Draculabo/AntigravityManager?style=flat-square" alt="Stars" />
-  </a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=Electron&logoColor=white" alt="Electron" />
-  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="TailwindCSS" />
-</p>
+A highly customized, minimalist, and hardware-focused fork of the original Antigravity Manager. Redesigned from the ground up for absolute efficiency and precision.
 
 ---
 
-## 📖 Table of Contents
+### [ SYSTEM OVERVIEW ]
 
-- [Why Antigravity Manager?](#-why-antigravity-manager)
-- [Features](#-features)
-- [Screenshots](#-screenshots)
-- [Quick Start](#-quick-start)
-- [Tech Stack](#️-tech-stack)
-- [Development](#-development)
-- [Debugging Docs](#-debugging-docs)
-- [FAQ](#-faq)
-- [Contributing](#-contributing)
-- [License](#-license)
+**Antigravity Manager** is a high-performance LLM / API Quota Management system and local proxy gateway. It is designed to effortlessly manage pools of Google Gemini and Anthropic Claude accounts, routing your development traffic intelligently.
+
+The core purpose of this system is to provide a seamless, type-safe API proxy layer (running locally) that balances requests across multiple LLM accounts to avoid rate limits, maximize throughput, and automatically fall back to alternative nodes when quotas are exhausted.
 
 ---
 
-## ✨ Why Antigravity Manager?
+### [ CORE PROTOCOLS ]
 
-When using Antigravity IDE, have you ever encountered these problems?
+#### AUTONOMOUS ROUTING (AUTO-SWITCH)
+The system is equipped with an autonomous routing engine. When `AUTO-SWITCH` is active, the network operation console continuously monitors the quota status of all connected account nodes. If a primary node hits a rate limit or exhausts its capacity, the system automatically redirects incoming traffic to the next healthiest node in the pool. No manual intervention required. 
 
-- 😫 Single account quota runs out quickly, requiring frequent manual switching
-- 🔄 Managing multiple Google/Claude accounts is cumbersome
-- 📊 Don't know how much quota is left on the current account
-- ⏰ Worried about missing quota reset times
-- 🔌 Need a reliable local API proxy for development tools
-
-**Antigravity Manager** is here to solve these problems! It's a professional Electron desktop app that helps you:
-
-- ✅ **Unlimited Account Pool** - Add any number of Google Gemini / Claude accounts
-- ✅ **Smart Auto-Switching** - Automatically switch to the next available account when quota is low or rate-limited
-- ✅ **Real-time Monitoring** - Visualize quota usage for all accounts
-- ✅ **Local API Proxy** - Built-in OpenAI/Anthropic compatible proxy server
-- ✅ **Secure Encryption** - AES-256-GCM encryption for sensitive data
+#### INTELLIGENT MODEL MAPPING
+Seamlessly translate requests. Map `Claude Code` calls to `Gemini 3.1 Pro` or `Flash` endpoints on the fly. The proxy handles protocol translation natively, allowing tools like Cursor, Windsurf, or NextChat to utilize your managed account pool without friction.
 
 ---
 
-## 🎯 Features
+### [ DESIGN PHILOSOPHY ]
 
-<table>
-  <tr>
-    <td width="50%">
-      <h3>☁️ Cloud Account Pool</h3>
-      <ul>
-        <li>Add unlimited Google Gemini / Claude accounts via OAuth</li>
-        <li>Display avatar, email, status, and last used time</li>
-        <li>Real-time status monitoring (Active, Rate Limited, Expired)</li>
-      </ul>
-    </td>
-    <td width="50%">
-      <h3>📊 Real-time Quota Monitoring</h3>
-      <ul>
-        <li>Multi-model support: gemini-pro, claude-3-5-sonnet, etc.</li>
-        <li>Visual progress bars with color indicators</li>
-        <li>Auto & manual refresh capabilities</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>🔄 Intelligent Auto-Switching</h3>
-      <ul>
-        <li>Unlimited pool mode with smart backup selection</li>
-        <li>Auto-switch when quota < 5% or rate-limited</li>
-        <li>Background monitoring every 5 minutes</li>
-      </ul>
-    </td>
-    <td width="50%">
-      <h3>🔐 Security First</h3>
-      <ul>
-        <li>AES-256-GCM encryption for sensitive data</li>
-        <li>OS native credential manager integration</li>
-        <li>Auto migration of legacy plaintext data</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>💾 Account Backup</h3>
-      <ul>
-        <li>Capture snapshots of account state</li>
-        <li>Fast switching between saved accounts</li>
-        <li>View, organize, and delete snapshots</li>
-      </ul>
-    </td>
-    <td width="50%">
-      <h3>⚙️ Process Control</h3>
-      <ul>
-        <li>Auto-detect if Antigravity is running</li>
-        <li>Launch via URI protocol or executable</li>
-        <li>Graceful close or force kill</li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>🔌 Local API Proxy</h3>
-      <ul>
-        <li>OpenAI & Anthropic API compatible</li>
-        <li>Configurable port and request timeout</li>
-        <li>Model mapping (e.g. Claude → Gemini)</li>
-      </ul>
-    </td>
-    <td width="50%">
-      <h3>🛠️ Developer Tools</h3>
-      <ul>
-        <li>Built-in cURL & Python code generation</li>
-        <li>Visual service status monitoring</li>
-        <li>One-click API Key regeneration</li>
-      </ul>
-    </td>
-  </tr>
-</table>
+#### MINIMALIST BRUTALISM
+This fork abandons the traditional "Industrial Cyberpunk" neon-glow aesthetics in favor of a **Clean Engineering** approach. 
 
-### Additional Features
+- **Pure Monochromatic Contrast**: Deep, absolute black backgrounds paired with high-contrast matte white elements. 
+- **Typography-First**: Uppercase, tracked-out font structures that mimic hardware diagnostic screens and terminal interfaces.
+- **Zero Distractions**: No gradients. No unnecessary borders. No neon shadows. Every pixel serves a functional purpose.
 
-- **🖥️ System Tray** - Background mode with tray icon and right-click menu
-- **🔗 IDE Sync** - Automatically scan and import accounts from IDE's `state.vscdb`
-- **📦 Batch Operations** - Batch refresh and delete multiple accounts
-- **📤 JSON Export/Import** - Export and import account pools with schema validation and deduplication
-- **🔔 Desktop Notifications** - Configurable alerts when model quota drops below your threshold
-- **🌐 Per-Account Proxy** - Route individual accounts through their own HTTP/SOCKS5 proxy
-- **📊 Smart Sorting** - Sort accounts by recently used, overall quota, or specific model groups
-- **📋 Compact Layout** - Dense horizontal view to maximize visible accounts
-- **🌏 Internationalization** - Multi-language support (English / 中文 / Русский)
-- **🎨 Modern UI** - Built with React, TailwindCSS, and Shadcn UI
+It is an interface designed not just to look professional, but to feel like mission-critical control software.
 
 ---
 
-## 📸 Screenshots
+### [ TECH STACK ]
 
-<p align="center">
-  <img src="docs/assets/screenshot-main.png" alt="Main Interface" width="80%" />
-</p>
-
-<p align="center">
-  <img src="docs/assets/screenshot-proxy.png" alt="Proxy Interface" width="48%" />
-  <img src="docs/assets/screenshot-setting.png" alt="Settings Interface" width="48%" />
-</p>
-
+- **Core**: Electron (Main/Renderer Architecture)
+- **Frontend Engine**: React 19 + TypeScript + Vite
+- **Styling**: Tailwind CSS v4 (Flat, glow-free architecture)
+- **State & Routing**: TanStack Query + TanStack Router
+- **Backend Services**: NestJS Proxy Layer + Better-SQLite3
+- **Type Safety**: Zod + ORPC (End-to-End safe)
 
 ---
 
-## � Quick Start
+### [ DEPLOYMENT & OPERATION ]
 
-### Download
+To initialize the command console on your local hardware:
 
-Download the latest release for your platform from the [Releases](https://github.com/Draculabo/AntigravityManager/releases) page.
-
-| Platform | Download |
-|----------|----------|
-| Windows (x64/ARM64) | [.exe installer](https://github.com/Draculabo/AntigravityManager/releases/latest) |
-| macOS | [.dmg installer](https://github.com/Draculabo/AntigravityManager/releases/latest) |
-| Linux | [.deb / .rpm](https://github.com/Draculabo/AntigravityManager/releases/latest) |
-| NixOS / Nix | `nix run github:Draculabo/AntigravityManager` |
-
-### ❄️ Nix Integration
-
-You can integrate Antigravity Manager into your Nix configuration using the provided flake.
-
-#### 🛠️ NixOS / Home Manager
-
-Add the flake to your `flake.nix` inputs:
-
-```nix
-inputs = {
-  nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-  antigravity-manager.url = "github:Draculabo/AntigravityManager";
-};
-```
-
-To integrate with your system, add `antigravity-manager.overlays.default` to your `nixpkgs.overlays`. This ensures the package is correctly built against your own `nixpkgs` instance and respects your global configuration.
-
-```nix
-# Add to your NixOS/Home Manager configuration
-{
-  nixpkgs.overlays = [ inputs.antigravity-manager.overlays.default ];
-  
-  # Antigravity Manager has an unfree license (cc-by-nc-sa-40)
-  nixpkgs.config.allowUnfree = true; 
-
-  environment.systemPackages = [
-    pkgs.antigravity-manager
-  ];
-}
-```
-
-#### 💻 Development Shell
-
-If you're using the overlay above, you can simply add it to your `devShell`:
-
-```nix
-devShells.default = pkgs.mkShell {
-  packages = [
-    pkgs.antigravity-manager
-  ];
-};
-```
-
-> [!NOTE]
-> Since the package is unfree, you **must** have `allowUnfree = true;` enabled in your `nixpkgs` configuration for it to evaluate correctly.
-
-### Build from Source
-
-#### Prerequisites
-
-- Node.js v18 or higher
-- npm or yarn
-
-#### Steps
-
+#### 1. INSTALL DEPENDENCIES
+Ensure you are running Node.js 20+.
 ```bash
-# Clone the repository
-git clone https://github.com/Draculabo/AntigravityManager.git
-cd AntigravityManager
-
-# Install dependencies
 npm install
+```
 
-# Start development
+#### 2. INITIATE SYSTEM
+Boot the Electron development environment.
+```bash
 npm start
+```
 
-# Build for production
+#### 3. BUILD FOR PRODUCTION
+Package the binary for your specific architecture.
+```bash
 npm run make
 ```
 
 ---
 
-## �🛠️ Tech Stack
-
-| Category | Technologies |
-|----------|-------------|
-| **Core** | [Electron](https://www.electronjs.org/), [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/) |
-| **Build Tool** | [Vite](https://vitejs.dev/) |
-| **Styling** | [TailwindCSS](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/) |
-| **State** | [TanStack Query](https://tanstack.com/query/latest), [TanStack Router](https://tanstack.com/router/latest) |
-| **Database** | [Better-SQLite3](https://github.com/WiseLibs/better-sqlite3) |
-| **Testing** | [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/) |
-
----
-
-## � Development
-
-### Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start the app in development mode |
-| `npm run lint` | Run ESLint to check for code issues |
-| `npm run format:write` | Format code with Prettier |
-| `npm run test:unit` | Run unit tests with Vitest |
-| `npm run test:e2e` | Run E2E tests with Playwright |
-| `npm run test:all` | Run all tests |
-| `npm run type-check` | Run TypeScript type checking |
-| `npm run make` | Build production packages |
-
-### Project Structure
-
-```
-AntigravityManager/
-├── src/
-│   ├── main.ts          # Electron main process
-│   ├── preload.ts       # Preload script
-│   ├── renderer/        # React renderer process
-│   ├── ipc/             # IPC communication handlers
-│   └── server/          # Built-in server
-├── docs/                # Documentation and assets
-└── .github/             # GitHub configuration
-```
-
----
-
-## 🔍 Debugging Docs
-
-If you want to inspect Antigravity or Antigravity Manager traffic with Proxyman, start here:
-
-- [Proxyman Installation and Basic Setup on Windows](docs/proxyman-install.md)
-- [Proxyman Debugging Guide for Antigravity and Antigravity Manager](docs/proxyman-debugging.md)
-- [Project Audit and Experiment Guide](docs/project-audit.md)
-
----
-
-## ❓ FAQ
-
-<details>
-<summary><b>Q: The app won't start?</b></summary>
-
-Please check:
-1. Make sure all dependencies are installed: `npm install`
-2. Check if Node.js version is >= 18
-3. Try deleting `node_modules` and reinstalling
-
-</details>
-
-<details>
-<summary><b>Q: Account login failed?</b></summary>
-
-1. Ensure network connection is working
-2. Try clearing app data and logging in again
-3. Check if the account is restricted by Google/Claude
-
-</details>
-
-<details>
-<summary><b>Q: macOS shows Keychain/Credential error and OAuth cannot be saved?</b></summary>
-
-This is a common macOS security behavior, usually when the app is unsigned or run directly from Downloads.
-This is a **temporary workaround** for personal use:
-
-1. Move the app to `/Applications`
-2. Run the following commands in Terminal (repeat after every update)
-
-```plaintext
-sudo xattr -dr com.apple.quarantine "/Applications/Antigravity Manager 2.app"
-codesign --force --deep --sign - "/Applications/Antigravity Manager 2.app"
-```
-
-Reopen the app and allow Keychain access if prompted.
-
-</details>
-
-<details>
-<summary><b>Q: How to report issues or suggestions?</b></summary>
-
-Please submit issues or suggestions via [GitHub Issues](https://github.com/Draculabo/AntigravityManager/issues).
-
-</details>
-
----
-
-## 🌟 Star History
-
-<a href="https://github.com/Draculabo/AntigravityManager/stargazers">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Draculabo/AntigravityManager&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Draculabo/AntigravityManager&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Draculabo/AntigravityManager&type=Date" />
-  </picture>
-</a>
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-We follow the [Contributor Covenant](CODE_OF_CONDUCT.md) Code of Conduct.
-
----
-
-## 📄 License
-
-[CC BY-NC-SA 4.0](LICENSE)
-
----
-
-## ⚠️ Disclaimer
-
-> [!WARNING]
-> **For Educational Purposes Only**
->
-> This project is intended solely for educational and research purposes. It is provided "as-is" without any warranty. **Commercial use is strictly prohibited.**
->
-> By using this software, you agree that you will not use it for any commercial purposes, and you are solely responsible for ensuring your use complies with all applicable laws and regulations. The authors and contributors are not responsible for any misuse or damages arising from the use of this software.
-
----
-
-<p align="center">
-  If this project helps you, please give it a ⭐ Star!
-</p>
+*“Perfection is achieved, not when there is nothing more to add, but when there is nothing left to take away.”*

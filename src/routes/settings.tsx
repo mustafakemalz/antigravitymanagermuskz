@@ -114,7 +114,7 @@ function SettingsPage() {
           <PanelCard>
             <PanelCardHeader>
               <div className="flex items-center gap-2">
-                <MonitorCog className="h-4 w-4 text-cyan-300" />
+                <MonitorCog className="h-4 w-4 text-white/70" />
                 <span className="terminal-meta">{t('settings.appearance.title')}</span>
               </div>
               <div className="mt-2 text-sm uppercase tracking-[0.16em]">
@@ -165,7 +165,7 @@ function SettingsPage() {
           <PanelCard>
             <PanelCardHeader>
               <div className="flex items-center gap-2">
-                <HardDrive className="h-4 w-4 text-cyan-300" />
+                <HardDrive className="h-4 w-4 text-white/70" />
                 <span className="terminal-meta">{t('settings.account.title')}</span>
               </div>
               <div className="mt-2 text-sm uppercase tracking-[0.16em]">
@@ -209,7 +209,7 @@ function SettingsPage() {
             <PanelCard>
               <PanelCardHeader>
                 <div className="flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-cyan-300" />
+                  <Activity className="h-4 w-4 text-white/70" />
                   <span className="terminal-meta">{t('settings.startup.title')}</span>
                 </div>
                 <div className="mt-2 text-sm uppercase tracking-[0.16em]">
@@ -241,7 +241,7 @@ function SettingsPage() {
           <PanelCard>
             <PanelCardHeader>
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-cyan-300" />
+                <Shield className="h-4 w-4 text-white/70" />
                 <span className="terminal-meta">{t('settings.privacy.title')}</span>
               </div>
               <div className="mt-2 text-sm uppercase tracking-[0.16em]">
@@ -270,7 +270,7 @@ function SettingsPage() {
           <PanelCard>
             <PanelCardHeader>
               <div className="flex items-center gap-2">
-                <BellRing className="h-4 w-4 text-cyan-300" />
+                <BellRing className="h-4 w-4 text-white/70" />
                 <span className="terminal-meta">{t('settings.notifications.title')}</span>
               </div>
               <div className="mt-2 text-sm uppercase tracking-[0.16em]">

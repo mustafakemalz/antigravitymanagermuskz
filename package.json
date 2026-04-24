@@ -1,7 +1,7 @@
 {
-  "name": "antigravity-manager",
+  "name": "muskz-manager",
   "productName": "Muskz Command",
-  "version": "0.11.1",
+  "version": "0.1",
   "description": "Muskz Command - Electron App",
   "main": ".vite/build/main.js",
   "private": true,

@@ -52,7 +52,7 @@ export const ProviderGroup: React.FC<ProviderGroupProps> = ({
       <button
         type="button"
         onClick={onToggleCollapse}
-        className="hover:bg-muted/30 flex w-full items-center gap-3 border-b border-cyan-400/10 px-3 py-3 text-left transition-colors"
+        className="hover:bg-muted/30 flex w-full items-center gap-3 border-b border-white/10 px-3 py-3 text-left transition-colors"
       >
         {isCollapsed ? (
           <ChevronRight className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
@@ -61,7 +61,7 @@ export const ProviderGroup: React.FC<ProviderGroupProps> = ({
         )}
 
         <span
-          className="inline-block h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_10px_rgba(0,255,255,0.28)]"
+          className="inline-block h-2 w-2 shrink-0 rounded-full"
           style={{ backgroundColor: providerInfo.color }}
         />
 
@@ -115,14 +115,14 @@ export const ProviderGroup: React.FC<ProviderGroupProps> = ({
               key={model.id}
               className={cn(
                 'panel-card grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-3 py-2.5',
-                index < visibleModels.length - 1 && 'border-cyan-400/10',
+                index < visibleModels.length - 1 && 'border-white/10',
               )}
             >
               <div
                 className={cn(
                   'h-2 w-2 rounded-full',
                   model.percentage > 0
-                    ? 'bg-primary shadow-[0_0_10px_rgba(0,255,255,0.75)]'
+                    ? 'bg-white'
                     : 'bg-border',
                 )}
               />

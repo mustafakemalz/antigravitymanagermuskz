@@ -261,9 +261,9 @@ export function CloudAccountCard({
     }
 
     return (
-      <div key={title} className="space-y-2">
+      <div key={title} className="space-y-3">
         <PanelSectionHeader label={title} />
-        <div className="space-y-3">
+        <div className="space-y-4">
           {models.map(([modelName, info]) => {
             const isHot = info.percentage > 0;
 
@@ -382,7 +382,7 @@ export function CloudAccountCard({
         account.is_active && 'border-white/20 bg-[#121212]',
       )}
     >
-      <PanelCardHeader className="relative border-b border-white/10 pb-4">
+      <PanelCardHeader className="relative border-b border-white/10 px-6 pb-5 pt-5">
         {onToggleSelection && (
           <div
             className={cn(
@@ -421,10 +421,10 @@ export function CloudAccountCard({
 
           <div className="min-w-0 flex-1">
             <div className="terminal-meta">ACCOUNT_UNIT</div>
-            <div className="truncate text-base font-semibold uppercase tracking-[0.16em]">
+            <div className="mt-1.5 truncate text-base font-semibold uppercase tracking-[0.16em]">
               {account.name || t('cloud.card.unknown')}
             </div>
-            <div className="text-muted-foreground mt-1 truncate text-xs">{account.email}</div>
+            <div className="text-muted-foreground mt-2 truncate text-xs">{account.email}</div>
 
             {shouldShowAiCredits && aiCredits && (
               <div className="mt-3 text-[10px] uppercase tracking-[0.16em] text-white/70">
@@ -530,7 +530,7 @@ export function CloudAccountCard({
         </div>
       </PanelCardHeader>
 
-      <PanelCardContent className="flex-1 space-y-5">
+      <PanelCardContent className="flex-1 space-y-5 px-6 py-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Badge
