@@ -544,10 +544,7 @@ export class GoogleAPIService {
     }
     try {
       const config = ConfigManager.loadConfig();
-      if (config.proxy?.upstream_proxy?.enabled) {
-        if (!config.proxy.upstream_proxy.url) {
-          throw new Error('Upstream proxy is enabled but URL is not configured');
-        }
+      if (config.proxy?.upstream_proxy?.enabled && config.proxy.upstream_proxy.url) {
         if (proxyTraceEnabled) {
           logger.info('[GoogleAPIService] Proxy source: config.proxy.upstream_proxy.url');
         }
